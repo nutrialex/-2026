@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<title>Δημιουργία διαιτολογίου 7 ημερών</title>
+<style>
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; margin: 24px; background: #f6f7f9; color: #222; }
+  h1 { font-size: 22px; } h2 { font-size: 17px; margin-bottom: 6px; }
+  fieldset { background: #fff; border: 1px solid #d5d9e0; border-radius: 8px; margin-bottom: 14px; padding: 12px 16px; }
+  legend { font-weight: 600; padding: 0 6px; }
+  label { display: inline-block; margin: 4px 12px 4px 0; }
+  input[type=text] { padding: 6px 8px; border: 1px solid #bbb; border-radius: 5px; width: 320px; }
+  input[type=text].small { width: 90px; }
+  select { padding: 6px; border-radius: 5px; border: 1px solid #bbb; }
+  button { padding: 6px 12px; border: 1px solid #2b6cb0; background: #2b6cb0; color: #fff; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  button.secondary { background: #fff; color: #2b6cb0; }
+  button.mini { padding: 2px 8px; font-size: 12px; margin-left: 8px; }
+  .card { background: #fff; border: 1px solid #d5d9e0; border-radius: 8px; margin: 10px 0; padding: 10px 14px; }
+  .card h3 { margin: 0 0 6px 0; font-size: 15px; color: #2b6cb0; }
+  .opt { margin: 3px 0 3px 12px; }
+  .note { color: #666; font-size: 13px; }
+  #status { font-weight: 600; }
+  .row { margin: 6px 0; }
+  .big { font-size: 15px; padding: 10px 18px; }
+</style>
+</head>
+<body>
+<h1>Δημιουργία διαιτολογίου 7 ημερών</h1>
+
+<fieldset>
+  <legend>1. Πρότυπα Word (.docx)</legend>
+  <div class="row">
+    <input type="file" id="tplFiles" accept=".docx" multiple>
+    <span id="status" class="note">Κανένα πρότυπο ακόμα — επιλέξτε τα 5 αρχεία (1200, 1300, 1500, 1700, 1900).</span>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>2. Κεφαλίδα εγγράφου (διαλέξτε 1, 2 ή 3)</legend>
+  <div class="row"><label>Κεφαλίδα 1: <input type="text" id="h1" placeholder="π.χ. Διαιτοφική Σ… | Διαιτολόγος"></label></div>
+  <div class="row"><label>Κεφαλίδα 2: <input type="text" id="h2" placeholder="2η κεφαλίδα"></label></div>
+  <div class="row"><label>Κεφαλίδα 3: <input type="text" id="h3" placeholder="3η κεφαλίδα"></label></div>
+  <div class="row">
+    Χρήση κεφαλίδας:
+    <label><input type="radio" name="hsel" value="1" checked> 1</label>
+    <label><input type="radio" name="hsel" value="2"> 2</label>
+    <label><input type="radio" name="hsel" value="3"> 3</label>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>3. Στοιχεία ασθενή (Α)</legend>
+  <div class="row"><label>Ονοματεπώνυμο πελάτη: <input type="text" id="client"></label></div>
+  <div class="row"><label>Θερμίδες διαιτολογίου:
+    <select id="kcal">
+      <option value="">— επιλέξτε —</option>
+      <option>1200</option><option>1300</option><option>1500</option><option>1700</option><option>1900</option>
+    </select></label>
+  </div>
+  <div class="row"><label>Το όνομά σας (υπογραφή στο τέλος): <input type="text" id="dname"></label></div>
+  <div class="row"><label>Ημερομηνία: <input type="text" id="date" class="small" placeholder="dd/mm/yyyy"></label></div>
+</fieldset>
+
+<fieldset>
+  <legend>4. Ερωτήσεις</legend>
+  <div class="row">(Β) 100 θερμίδες επιπλέον στο πρωινό (ομάδα Β πρωινών);
+    <label><input type="radio" name="b100" value="1"> Ναι</label>
+    <label><input type="radio" name="b100" value="0" checked> Όχι</label>
+  </div>
+  <div class="row">(Γ) 50 θερμίδες επιπλέον στα βραδινά (2ο κομμάτι);
+    <label><input type="radio" name="g50" value="1"> Ναι</label>
+    <label><input type="radio" name="g50" value="0" checked> Όχι</label>
+  </div>
+  <div class="row">(Ε) Απογευματινό:
+    <label><input type="radio" name="apog" value="fruit" checked> Φρούτο</label>
+    <label><input type="radio" name="apog" value="sweet"> Γλύκισμα</label>
+  </div>
+  <div class="row" id="stRow" style="display:none">(ΣΤ) Γεύμα προ του ύπνου; (μόνο στις 1900)
+    <label><input type="radio" name="st" value="1"> Ναι</label>
+    <label><input type="radio" name="st" value="0" checked> Όχι</label>
+  </div>
+  <div class="row">
+    <button id="createBtn" class="big">Δημιουργία διαιτολογίου</button>
+  </div>
+</fieldset>
+
+<div id="preview"></div>
+
+<fieldset id="actions" style="display:none">
+  <legend>5. Ενέργειες</legend>
+  <button id="rerollAll" class="secondary">↻ Ξαναεπιλογή όλων</button>
+  <button id="downloadBtn" class="big">💾 Λήψη Word (.docx)</button>
+  <button id="printBtn" class="secondary">🖨 Προεπισκόπηση εκτύπωσης</button>
+  <p class="note">Μετά τη λήψη, ανοίξτε το αρχείο στο Word για επεξεργασία πριν την εκτύπωση ή το e-mail.</p>
+</fieldset>
+
+<script>
+"use strict";
+
+const CALORIES = ["1200", "1300", "1500", "1700", "1900"];
+const FRUIT_TEXT = "Ένα φρούτο από τον πίνακα που σας έχω δώσει";
+const DAY_RE = /^(\d+)\s*η\s*ΜΕΡΑ$/;
+
+const state = {
+  templates: {},
+  headers: ["", "", ""],
+  headerSel: 1,
+  client: "", kcal: "", name: "", date: "",
+  ans: { b100: false, g50: false, fruit: true, st: false },
+  tpl: null,
+  ch: null
+};
+
+function xmlUnescape(s) {
+  return s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'").replace(/&#(\d+);/g, (m, n) => String.fromCharCode(+n))
+          .replace(/&amp;/g, "&");
+}
+
+function parseParagraphs(xml) {
+  const b0 = xml.indexOf("<w:body");
+  const b1 = xml.lastIndexOf("</w:body>");
+  const body = b0 >= 0 && b1 > b0 ? xml.slice(b0, b1) : xml;
+  const out = [];
+  const re = /<w:p(?:\s[^>]*?)?\/>|<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g;
+  let m;
+  while ((m = re.exec(body))) {
+    const pxml = m[0];
+    let text = "";
+    const tre = /<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g;
+    let tm;
+    while ((tm = tre.exec(pxml))) text += tm[1];
+    const sm = /<w:pStyle\s[^>]*w:val="([^"]*)"/.exec(pxml);
+    out.push({ text: xmlUnescape(text).trim(), style: sm ? sm[1] : "" });
+  }
+  return out;
+}
+
+function parseTemplate(xml) {
+  const paras = parseParagraphs(xml);
+  const data = {
+    proino_note: null, proino_A: [], proino_B: [],
+    dekatiano: [], apogevmatino: [], pro_upnou: [],
+    days: {}
+  };
+  for (let d = 1; d <= 7; d++) data.days[d] = { lunch: [], dinner1: [], dinner2: [] };
+  let cur = null, day = null, dinnerPart = 1;
+  for (const p of paras) {
+    const t = p.text, st = p.style;
+    if (!t) {
+      if (cur === "dinner") dinnerPart = 2;
+      continue;
+    }
+    const tn = t.replace(/ /g, "");
+    if (tn === "ΠΡΩΙΝΟ") { cur = "proino"; day = null; continue; }
+    if (t === "Α ΠΡΩΙΝΟ") { cur = "proino_A"; continue; }
+    if (t === "Β ΠΡΩΙΝΟ") { cur = "proino_B"; continue; }
+    if (tn === "ΔΕΚΑΤΙΑΝΟ") { cur = "dekatiano"; continue; }
+    if (tn === "ΑΠΟΓΕΥΜΑΤΙΝΟ") { cur = "apogevmatino"; continue; }
+    if (tn === "ΠΡΟΥΠΝΟΥ") { cur = "pro_upnou"; continue; }
+    const dm = DAY_RE.exec(t);
+    if (dm) { day = +dm[1]; cur = null; dinnerPart = 1; continue; }
+    if (t === "Μεσημεριανό") { cur = "lunch"; continue; }
+    if (t === "Βραδινό") { cur = "dinner"; dinnerPart = 1; continue; }
+    if (t.indexOf("(Ακολουθ") === 0) continue;
+    if (cur === "proino" && t.indexOf("Περιλαμβάνει") === 0) { data.proino_note = t; continue; }
+    if (cur === null) continue;
+    if (cur === "lunch" && day) data.days[day].lunch.push(t);
+    else if (cur === "dinner" && day) {
+      if (t.indexOf("Οι μέρες") === 0) { cur = null; continue; }
+      data.days[day][dinnerPart === 1 ? "dinner1" : "dinner2"].push(t);
+    }
+    else if (cur === "proino_A") data.proino_A.push(t);
+    else if (cur === "proino_B") data.proino_B.push(t);
+    else if (cur === "dekatiano") data.dekatiano.push(t);
+    else if (cur === "apogevmatino") data.apogevmatino.push(t);
+    else if (cur === "pro_upnou") data.pro_upnou.push(t);
+  }
+  return data;
+}
+
+async function unzipDocx(buf) {
+  const dv = new DataView(buf);
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= 0; i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error("Το αρχείο δεν είναι zip/docx");
+  const count = dv.getUint16(eocd + 10, true);
+  let off = dv.getUint32(eocd + 16, true);
+  const files = {};
+  const dec = new TextDecoder();
+  for (let i = 0; i < count; i++) {
+    if (dv.getUint32(off, true) !== 0x02014b50) break;
+    const method = dv.getUint16(off + 10, true);
+    const csize = dv.getUint32(off + 20, true);
+    const nameLen = dv.getUint16(off + 28, true);
+    const extraLen = dv.getUint16(off + 30, true);
+    const commLen = dv.getUint16(off + 32, true);
+    const localOff = dv.getUint32(off + 42, true);
+    const name = dec.decode(new Uint8Array(buf, off + 46, nameLen));
+    const lNameLen = dv.getUint16(localOff + 26, true);
+    const lExtraLen = dv.getUint16(localOff + 28, true);
+    const dataStart = localOff + 30 + lNameLen + lExtraLen;
+    const comp = new Uint8Array(buf, dataStart, csize);
+    let data;
+    if (method === 0) data = comp;
+    else if (method === 8) {
+      const ds = new DecompressionStream("deflate-raw");
+      const stream = new Blob([comp]).stream().pipeThrough(ds);
+      data = new Uint8Array(await new Response(stream).arrayBuffer());
+    } else throw new Error("Μη υποστηριζόμενη συμπίεση: " + method);
+    files[name] = data;
+    off += 46 + nameLen + extraLen + commLen;
+  }
+  return files;
+}
+
+function pick(pool, k) {
+  const p = [...new Set(pool)];
+  const n = Math.min(k, p.length);
+  const out = [];
+  const idx = [...p.keys()];
+  for (let i = 0; i < n; i++) {
+    const j = Math.floor(Math.random() * idx.length);
+    out.push(p[idx.splice(j, 1)[0]]);
+  }
+  return out;
+}
+
+function repickOne(pool, current) {
+  const others = [...new Set(pool)].filter(x => x !== current);
+  return others.length ? others[Math.floor(Math.random() * others.length)] : current;
+}
+
+function poolFor(key) {
+  const tpl = state.tpl;
+  if (key === "B") return state.ans.b100 ? tpl.proino_B : tpl.proino_A;
+  if (key === "D") return tpl.dekatiano;
+  if (key === "E") return tpl.apogevmatino;
+  if (key === "ST") return tpl.pro_upnou;
+  const m = /^(\d)([MB])$/.exec(key);
+  const d = +m[1], meal = m[2];
+  if (meal === "M") return tpl.days[d].lunch;
+  return state.ans.g50 ? tpl.days[d].dinner2 : tpl.days[d].dinner1;
+}
+
+function initialChoices() {
+  const ch = { Z: {} };
+  ch.B = pick(poolFor("B"), 3);
+  ch.D = state.tpl.dekatiano.length ? pick(state.tpl.dekatiano, 3) : null;
+  ch.E = state.ans.fruit ? [FRUIT_TEXT] : pick(state.tpl.apogevmatino, 2);
+  ch.ST = (state.kcal === "1900" && state.ans.st && state.tpl.pro_upnou.length) ? pick(state.tpl.pro_upnou, 2) : null;
+  for (let d = 1; d <= 7; d++) {
+    ch.Z[d + "M"] = pick(state.tpl.days[d].lunch, 2);
+    ch.Z[d + "B"] = pick(poolFor(d + "B"), 2);
+  }
+  return ch;
+}
+
+function getArr(key) {
+  if (key === "Z") return null;
+  return state.ch[key];
+}
+
+function rerollGroup(key) {
+  if (key === "B") state.ch.B = pick(poolFor("B"), 3);
+  else if (key === "D" && state.ch.D) state.ch.D = pick(poolFor("D"), 3);
+  else if (key === "E" && state.ch.E.length > 1) state.ch.E = pick(poolFor("E"), 2);
+  else if (key === "ST" && state.ch.ST) state.ch.ST = pick(poolFor("ST"), 2);
+  else if (/^[1-7][MB]$/.test(key)) state.ch.Z[key] = pick(poolFor(key), 2);
+}
+
+function rerollOne(key, i) {
+  let arr;
+  if (/^[1-7][MB]$/.test(key)) arr = state.ch.Z[key]; else arr = state.ch[key];
+  if (!arr || i >= arr.length) return;
+  if (key === "E" && state.ans.fruit) return;
+  arr[i] = repickOne(poolFor(key), arr[i]);
+}
+
+function groupList() {
+  const g = [{ key: "B", title: "ΠΡΩΙΝΟ" + (state.ans.b100 ? " — ομάδα Β (+100 Kcal)" : " — ομάδα Α") }];
+  if (state.ch.D) g.push({ key: "D", title: "ΔΕΚΑΤΙΑΝΟ" });
+  g.push({ key: "E", title: "ΑΠΟΓΕΥΜΑΤΙΝΟ" + (state.ans.fruit ? " — Φρούτο" : " — Γλύκισμα") });
+  if (state.ch.ST) g.push({ key: "ST", title: "ΠΡΟ ΥΠΝΟΥ" });
+  for (let d = 1; d <= 7; d++) {
+    g.push({ key: d + "M", title: "ΜΕΣΗΜΕΡΙΑΝΟ — ΜΕΡΑ " + d + "η" });
+    g.push({ key: d + "B", title: "ΒΡΑΔΙΝΟ — ΜΕΡΑ " + d + "η" + (state.ans.g50 ? " (+50 Kcal)" : "") });
+  }
+  return g;
+}
+
+function groupArr(key) {
+  return /^[1-7][MB]$/.test(key) ? state.ch.Z[key] : state.ch[key];
+}
+
+/* ---------- δημιουργία .docx ---------- */
+
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(u8) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < u8.length; i++) c = CRC_TABLE[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function zipStore(entries) {
+  const enc = new TextEncoder();
+  const now = new Date();
+  const dtime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const ddate = (((now.getFullYear() - 1980) & 0x7F) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const parts = [], central = [];
+  let offset = 0;
+  for (const e of entries) {
+    const nameB = enc.encode(e.name);
+    const data = e.data;
+    const crc = crc32(data);
+    const lh = new Uint8Array(30);
+    const dv = new DataView(lh.buffer);
+    dv.setUint32(0, 0x04034b50, true); dv.setUint16(4, 20, true); dv.setUint16(8, 0, true);
+    dv.setUint16(10, dtime, true); dv.setUint16(12, ddate, true);
+    dv.setUint32(14, crc, true); dv.setUint32(18, data.length, true); dv.setUint32(22, data.length, true);
+    dv.setUint16(26, nameB.length, true);
+    parts.push(lh, nameB, data);
+    const ch = new Uint8Array(46);
+    const cv = new DataView(ch.buffer);
+    cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
+    cv.setUint16(12, dtime, true); cv.setUint16(14, ddate, true);
+    cv.setUint32(16, crc, true); cv.setUint32(20, data.length, true); cv.setUint32(24, data.length, true);
+    cv.setUint16(28, nameB.length, true); cv.setUint32(42, offset, true);
+    central.push(ch, nameB);
+    offset += 30 + nameB.length + data.length;
+  }
+  const cdSize = central.reduce((s, p) => s + p.length, 0);
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, entries.length, true); ev.setUint16(10, entries.length, true);
+  ev.setUint32(12, cdSize, true); ev.setUint32(16, offset, true);
+  const out = new Uint8Array(offset + cdSize + 22);
+  let pos = 0;
+  for (const p of parts) { out.set(p, pos); pos += p.length; }
+  for (const p of central) { out.set(p, pos); pos += p.length; }
+  out.set(eocd, pos);
+  return out;
+}
+
+function escXml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function wPara(text, opts) {
+  opts = opts || {};
+  let rpr = "";
+  if (opts.bold || opts.size) {
+    rpr = "<w:rPr>" + (opts.bold ? "<w:b/>" : "") +
+      (opts.size ? '<w:sz w:val="' + opts.size + '"/><w:szCs w:val="' + opts.size + '"/>' : "") + "</w:rPr>";
+  }
+  const ppr = opts.center ? '<w:pPr><w:jc w:val="center"/></w:pPr>' : "";
+  return '<w:p>' + ppr + '<w:r>' + rpr + '<w:t xml:space="preserve">' + escXml(text) + "</w:t></w:r></w:p>";
+}
+
+function buildDocxBytes() {
+  const tpl = state.tpl, ch = state.ch;
+  const header = state.headers[state.headerSel - 1] || "";
+  const footer = "Ονοματεπώνυμο: " + state.client + "      Ημερομηνία: " + state.date;
+
+  let body = "";
+  body += wPara("Πρόγραμμα Διατροφής για – «" + state.client + "» – «" + state.kcal + " Θερμίδες»", { bold: true, size: 32, center: true });
+  body += wPara("ΠΡΩΙΝΟ", { bold: true, size: 28 });
+  if (tpl.proino_note) body += wPara(tpl.proino_note);
+  body += wPara("Ομάδα " + (state.ans.b100 ? "Β (+100 Kcal)" : "Α"), { bold: true });
+  for (const t of ch.B) body += wPara("•  " + t);
+  if (ch.D) {
+    body += wPara("ΔΕΚΑΤΙΑΝΟ", { bold: true, size: 28 });
+    for (const t of ch.D) body += wPara("•  " + t);
+  }
+  body += wPara("ΑΠΟΓΕΥΜΑΤΙΝΟ", { bold: true, size: 28 });
+  for (const t of ch.E) body += wPara("•  " + t);
+  if (ch.ST) {
+    body += wPara("ΠΡΟ ΥΠΝΟΥ", { bold: true, size: 28 });
+    for (const t of ch.ST) body += wPara("•  " + t);
+  }
+  body += wPara("ΜΕΣΗΜΕΡΙΑΝΟ", { bold: true, size: 28 });
+  for (let d = 1; d <= 7; d++) {
+    body += wPara("ΜΕΡΑ " + d + "η", { bold: true, size: 24 });
+    for (const t of ch.Z[d + "M"]) body += wPara("•  " + t);
+  }
+  body += wPara("ΒΡΑΔΙΝΟ", { bold: true, size: 28 });
+  for (let d = 1; d <= 7; d++) {
+    body += wPara("ΜΕΡΑ " + d + "η", { bold: true, size: 24 });
+    for (const t of ch.Z[d + "B"]) body += wPara("•  " + t);
+  }
+  body += wPara("Καλή συνεργασία,");
+  body += wPara(state.name, { bold: true });
+  body += wPara(state.date);
+
+  const documentXml =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+    '<w:body>' + body +
+    '<w:sectPr><w:headerReference w:type="default" r:id="rId2"/>' +
+    '<w:footerReference w:type="default" r:id="rId3"/>' +
+    '<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>' +
+    '</w:body></w:document>';
+
+  const headerXml =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    wPara(header, { center: true }) + '</w:hdr>';
+  const footerXml =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    wPara(footer, { center: true }) + '</w:ftr>';
+
+  const stylesXml =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    '<w:docDefaults><w:rPrDefault><w:rPr>' +
+    '<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/>' +
+    '<w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults>' +
+    '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
+    '</w:styles>';
+
+  const contentTypes =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+    '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+    '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' +
+    '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>' +
+    '</Types>';
+
+  const rels =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+    '</Relationships>';
+
+  const docRels =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>' +
+    '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' +
+    '</Relationships>';
+
+  const enc = new TextEncoder();
+  const entries = [
+    { name: "[Content_Types].xml", data: enc.encode(contentTypes) },
+    { name: "_rels/.rels", data: enc.encode(rels) },
+    { name: "word/document.xml", data: enc.encode(documentXml) },
+    { name: "word/_rels/document.xml.rels", data: enc.encode(docRels) },
+    { name: "word/styles.xml", data: enc.encode(stylesXml) },
+    { name: "word/header1.xml", data: enc.encode(headerXml) },
+    { name: "word/footer1.xml", data: enc.encode(footerXml) }
+  ];
+  return zipStore(entries);
+}
+
+function sanitizeName(s) {
+  return s.replace(/[\\/:*?"<>|]/g, "_").trim().replace(/ /g, "_");
+}
+
+/* ---------- UI ---------- */
+
+function readInputs() {
+  state.headers = [
+    document.getElementById("h1").value.trim(),
+    document.getElementById("h2").value.trim(),
+    document.getElementById("h3").value.trim()
+  ];
+  const hs = document.querySelector('input[name="hsel"]:checked');
+  state.headerSel = hs ? +hs.value : 1;
+  state.client = document.getElementById("client").value.trim();
+  state.kcal = document.getElementById("kcal").value;
+  state.name = document.getElementById("dname").value.trim();
+  state.date = document.getElementById("date").value.trim();
+  if (!state.date) {
+    const n = new Date();
+    state.date = String(n.getDate()).padStart(2, "0") + "/" + String(n.getMonth() + 1).padStart(2, "0") + "/" + n.getFullYear();
+  }
+  state.ans.b100 = document.querySelector('input[name="b100"]:checked').value === "1";
+  state.ans.g50 = document.querySelector('input[name="g50"]:checked').value === "1";
+  state.ans.fruit = document.querySelector('input[name="apog"]:checked').value === "fruit";
+  const stEl = document.querySelector('input[name="st"]:checked');
+  state.ans.st = stEl ? stEl.value === "1" : false;
+}
+
+function render() {
+  const pv = document.getElementById("preview");
+  pv.innerHTML = "";
+  const info = document.createElement("div");
+  info.className = "card";
+  info.innerHTML = "<h3>«Πρόγραμμα Διατροφής για – «" + escHtml(state.client) + "» – «" + state.kcal + " Θερμίδες»»</h3>" +
+    '<p class="note">Κεφαλίδα: ' + (state.headerSel) + ' | Υποσέλιδο: Ονοματεπώνυμο: ' + escHtml(state.client) + " — Ημερομηνία: " + escHtml(state.date) +
+    ' | Τέλος: Καλή συνεργασία, ' + escHtml(state.name) + ", " + escHtml(state.date) + "</p>";
+  pv.appendChild(info);
+  for (const g of groupList()) {
+    const arr = groupArr(g.key);
+    const card = document.createElement("div");
+    card.className = "card";
+    const h = document.createElement("h3");
+    h.textContent = g.title;
+    const btnAll = document.createElement("button");
+    btnAll.className = "mini secondary";
+    btnAll.textContent = "↻ όλα (Random)";
+    btnAll.onclick = () => { rerollGroup(g.key); render(); };
+    h.appendChild(btnAll);
+    card.appendChild(h);
+    arr.forEach((t, i) => {
+      const row = document.createElement("div");
+      row.className = "opt";
+      row.textContent = (i + 1) + ". " + t + "  ";
+      const b = document.createElement("button");
+      b.className = "mini secondary";
+      b.textContent = "\\ Random (επιλογή " + (i + 1) + ")";
+      b.onclick = () => { rerollOne(g.key, i); render(); };
+      row.appendChild(b);
+      card.appendChild(row);
+    });
+    pv.appendChild(card);
+  }
+  document.getElementById("actions").style.display = "";
+}
+
+function escHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function createDiet() {
+  readInputs();
+  if (!state.client) { alert("Δώστε ονοματεπώνυμο πελάτη."); return; }
+  if (!state.kcal) { alert("Επιλέξτε θερμίδες διαιτολογίου."); return; }
+  if (!state.templates[state.kcal]) { alert("Λείπει το πρότυπο " + state.kcal + ".docx από τα επιλεγμένα αρχεία."); return; }
+  if (!state.name) { alert("Δώστε το όνομά σας για την υπογραφή."); return; }
+  state.tpl = state.templates[state.kcal];
+  state.ch = initialChoices();
+  render();
+}
+
+function downloadDocx() {
+  if (!state.ch) return;
+  readInputs();
+  const bytes = buildDocxBytes();
+  const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "Διαιτολόγιο_" + sanitizeName(state.client || "ασθενη") + "_" + state.kcal + "_" + state.date.replace(/\//g, "-") + ".docx";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+
+function printPreview() {
+  if (!state.ch) return;
+  let html = "<h2>Πρόγραμμα Διατροφής για – «" + escHtml(state.client) + "» – «" + state.kcal + " Θερμίδες»</h2>";
+  html += "<p><i>Κεφαλίδα: " + escHtml(state.headers[state.headerSel - 1] || "") + "</i></p>";
+  const emit = (title, arr) => {
+    html += "<h3>" + escHtml(title) + "</h3><ul>";
+    for (const t of arr) html += "<li>" + escHtml(t) + "</li>";
+    html += "</ul>";
+  };
+  if (state.tpl.proino_note) html += "<p>" + escHtml(state.tpl.proino_note) + "</p>";
+  emit("ΠΡΩΙΝΟ (" + (state.ans.b100 ? "Β" : "Α") + ")", state.ch.B);
+  if (state.ch.D) emit("ΔΕΚΑΤΙΑΝΟ", state.ch.D);
+  emit("ΑΠΟΓΕΥΜΑΤΙΝΟ", state.ch.E);
+  if (state.ch.ST) emit("ΠΡΟ ΥΠΝΟΥ", state.ch.ST);
+  html += "<h3>ΜΕΣΗΜΕΡΙΑΝΟ</h3>";
+  for (let d = 1; d <= 7; d++) emit("ΜΕΡΑ " + d + "η", state.ch.Z[d + "M"]);
+  html += "<h3>ΒΡΑΔΙΝΟ</h3>";
+  for (let d = 1; d <= 7; d++) emit("ΜΕΡΑ " + d + "η", state.ch.Z[d + "B"]);
+  html += "<p>Καλή συνεργασία,<br>" + escHtml(state.name) + "<br>" + escHtml(state.date) + "</p>";
+  html += "<p><i>Υποσέλιδο: Ονοματεπώνυμο: " + escHtml(state.client) + " — Ημερομηνία: " + escHtml(state.date) + "</i></p>";
+  const w = window.open("", "_blank", "width=800,height=900");
+  w.document.write("<html><head><meta charset='utf-8'><title>Προεπισκόπηση</title></head><body>" + html + "</body></html>");
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 400);
+}
+
+async function onFilesChosen(files) {
+  state.templates = {};
+  for (const f of files) {
+    const km = /(1200|1300|1500|1700|1900)/.exec(f.name);
+    if (!km) continue;
+    const buf = await f.arrayBuffer();
+    const zip = await unzipDocx(buf);
+    if (!zip["word/document.xml"]) { alert("Μη έγκυρο docx: " + f.name); continue; }
+    const xml = new TextDecoder("utf-8").decode(zip["word/document.xml"]);
+    state.templates[km[1]] = parseTemplate(xml);
+  }
+  const loaded = CALORIES.filter(c => state.templates[c]);
+  document.getElementById("status").textContent =
+    loaded.length ? "Φορτώθηκαν πρότυπα: " + loaded.join(", ") : "Κανένα πρότυπο ακόμα — επιλέξτε τα 5 αρχεία (1200, 1300, 1500, 1700, 1900).";
+}
+
+function initUI() {
+  document.getElementById("tplFiles").addEventListener("change", e => onFilesChosen(e.target.files));
+  document.getElementById("createBtn").addEventListener("click", createDiet);
+  document.getElementById("rerollAll").addEventListener("click", () => { if (state.ch) { state.ch = initialChoices(); render(); } });
+  document.getElementById("downloadBtn").addEventListener("click", downloadDocx);
+  document.getElementById("printBtn").addEventListener("click", printPreview);
+  document.getElementById("kcal").addEventListener("change", e => {
+    document.getElementById("stRow").style.display = e.target.value === "1900" ? "" : "none";
+  });
+  document.querySelectorAll('input[name="b100"]').forEach(r => r.addEventListener("change", () => {
+    if (!state.ch) return;
+    readInputs();
+    state.ch.B = pick(poolFor("B"), 3);
+    render();
+  }));
+  document.querySelectorAll('input[name="g50"]').forEach(r => r.addEventListener("change", () => {
+    if (!state.ch) return;
+    readInputs();
+    for (let d = 1; d <= 7; d++) state.ch.Z[d + "B"] = pick(poolFor(d + "B"), 2);
+    render();
+  }));
+  document.querySelectorAll('input[name="apog"]').forEach(r => r.addEventListener("change", () => {
+    if (!state.ch) return;
+    readInputs();
+    state.ch.E = state.ans.fruit ? [FRUIT_TEXT] : pick(state.tpl.apogevmatino, 2);
+    render();
+  }));
+  document.querySelectorAll('input[name="st"]').forEach(r => r.addEventListener("change", () => {
+    if (!state.ch) return;
+    readInputs();
+    state.ch.ST = (state.kcal === "1900" && state.ans.st) ? pick(state.tpl.pro_upnou, 2) : null;
+    render();
+  }));
+}
+
+if (typeof document !== "undefined") {
+  initUI();
+}
+</script>
+</body>
+</html>
