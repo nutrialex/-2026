@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <title>Δημιουργία διαιτολογίου 7 ημερών</title>
 <style>
-  body { font-family: "Palatino Linotype", Palatino, "Times New Roman", serif; font-size: 12pt; margin: 24px; background: #f5f1e6; color: #3d3a30; }
+  body { font-family: "Palatino Linotype", Palatino, "Times New Roman", serif; font-size: 11pt; margin: 24px; background: #f5f1e6; color: #3d3a30; }
   #bannerImg { width: 680px; max-width: 100%; display: block; }
   #bannerSpacer { height: 1.2em; }
   fieldset { background: #fffdf6; border: 1px solid #d9cfae; border-radius: 10px; margin-bottom: 14px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(122, 106, 60, .12); }
   legend { font-weight: 700; padding: 0 8px; color: #5f7a3d; }
   label { display: inline-block; margin: 4px 12px 4px 0; }
-  input[type=text] { padding: 6px 8px; border: 1px solid #c9bd97; border-radius: 6px; width: 320px; font-family: inherit; font-size: 12pt; background: #fff; }
-  select { padding: 6px; border-radius: 6px; border: 1px solid #c9bd97; font-family: inherit; font-size: 12pt; background: #fff; }
+  input[type=text] { padding: 6px 8px; border: 1px solid #c9bd97; border-radius: 6px; width: 320px; font-family: inherit; font-size: 11pt; background: #fff; }
+  select { padding: 6px; border-radius: 6px; border: 1px solid #c9bd97; font-family: inherit; font-size: 11pt; background: #fff; }
   button { padding: 6px 12px; border: 1px solid #5f7a3d; background: #6b8e4e; color: #fff; border-radius: 7px; cursor: pointer; font-size: 11pt; font-family: inherit; }
   button:hover { background: #5f7a3d; }
   button.secondary { background: #fffdf6; color: #5f7a3d; }
@@ -186,10 +186,8 @@ function parseTemplate(xml) {
   return data;
 }
 
-function proinoLine(note) {
-  if (!note) return "";
-  const i = note.indexOf("στέβια");
-  return i >= 0 ? note.slice(0, i + "στέβια".length) : note;
+function proinoLine() {
+  return "Καφές ή τσάι με ή χωρίς στέβια";
 }
 
 async function unzipDocx(buf) {
@@ -371,7 +369,7 @@ const FONT = "Palatino Linotype";
 function wPara(text, opts) {
   opts = opts || {};
   const rpr = '<w:rPr><w:rFonts w:ascii="' + FONT + '" w:hAnsi="' + FONT + '" w:cs="' + FONT + '"/>' +
-    (opts.bold ? "<w:b/>" : "") + '<w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr>';
+    (opts.bold ? "<w:b/>" : "") + '<w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr>';
   let ppr = "<w:pPr>";
   if (opts.center) ppr += '<w:jc w:val="center"/>';
   if (opts.keepNext) ppr += "<w:keepNext/>";
@@ -476,7 +474,7 @@ function buildDocxBytes() {
     '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
     '<w:docDefaults><w:rPrDefault><w:rPr>' +
     '<w:rFonts w:ascii="' + FONT + '" w:hAnsi="' + FONT + '" w:eastAsia="' + FONT + '" w:cs="' + FONT + '"/>' +
-    '<w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr></w:rPrDefault></w:docDefaults>' +
+    '<w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults>' +
     '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
     '</w:styles>';
 
@@ -646,7 +644,7 @@ function downloadDocx() {
 function printPreview() {
   if (!state.ch) return;
   const tpl = state.tpl;
-  let html = "<div style='font-family:\"Palatino Linotype\",Palatino,serif;font-size:12pt'>";
+  let html = "<div style='font-family:\"Palatino Linotype\",Palatino,serif;font-size:11pt'>";
   html += "<h2 style='text-align:center'>Πρόγραμμα Διατροφής για – «" + escHtml(state.client) + "» – «" + state.kcal + " Θερμίδες»</h2>";
   const emit = (title, arr) => {
     html += "<p><b>" + escHtml(title) + "</b></p>";
