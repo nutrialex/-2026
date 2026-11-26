@@ -143,7 +143,7 @@ function parseTemplate(xml) {
   for (let d = 1; d <= 7; d++) data.days[d] = { lunch: [], dinner1: [], dinner2: [] };
   let cur = null, day = null, dinnerPart = 1;
   for (const p of paras) {
-    const t = p.text;
+    const t = p.text.replace(/επιδόρπιο/g, "επιδόρπιο πρωτεΐνης");
     if (!t) {
       if (cur === "dinner") dinnerPart = 2;
       continue;
@@ -390,32 +390,32 @@ function buildDocxBytes() {
   body += wPara("ΠΡΩΙΝΟ", { bold: true });
   const note = proinoLine(tpl.proino_note);
   if (note) body += wPara(note);
-  for (const t of ch.B) body += wPara("•  " + t);
+  for (const t of ch.B) body += wPara("✓  " + t);
   body += W_EMPTY;
 
   if (ch.D) {
     body += wPara("ΔΕΚΑΤΙΑΝΟ", { bold: true });
-    for (const t of ch.D) body += wPara("•  " + t);
+    for (const t of ch.D) body += wPara("✓  " + t);
     body += W_EMPTY;
   }
 
   body += wPara("ΑΠΟΓΕΥΜΑΤΙΝΟ", { bold: true });
-  for (const t of ch.E) body += wPara("•  " + t);
+  for (const t of ch.E) body += wPara("✓  " + t);
   body += W_EMPTY;
 
   if (ch.ST) {
     body += wPara("ΠΡΟ ΥΠΝΟΥ", { bold: true });
-    for (const t of ch.ST) body += wPara("•  " + t);
+    for (const t of ch.ST) body += wPara("✓  " + t);
     body += W_EMPTY;
   }
 
   for (let d = 1; d <= 7; d++) {
     body += wPara("ΜΕΡΑ " + d + "η", { bold: true });
     body += wPara("Μεσημεριανό", { bold: true });
-    for (const t of ch.Z[d + "M"]) body += wPara("•  " + t);
+    for (const t of ch.Z[d + "M"]) body += wPara("✓  " + t);
     body += W_EMPTY;
     body += wPara("Βραδινό", { bold: true });
-    for (const t of ch.Z[d + "B"]) body += wPara("•  " + t);
+    for (const t of ch.Z[d + "B"]) body += wPara("✓  " + t);
     body += W_EMPTY;
   }
 
@@ -426,7 +426,7 @@ function buildDocxBytes() {
     '<w:body>' + body +
     '<w:sectPr><w:headerReference w:type="default" r:id="rId2"/>' +
     '<w:footerReference w:type="default" r:id="rId3"/>' +
-    '<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>' +
+    '<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="850" w:right="850" w:bottom="850" w:left="850"/></w:sectPr>' +
     '</w:body></w:document>';
 
   let headerXml;
@@ -632,14 +632,15 @@ function printPreview() {
   let html = "<div style='font-family:\"Times New Roman\",serif;font-size:12pt'>";
   html += "<h2 style='text-align:center'>Πρόγραμμα Διατροφής για – «" + escHtml(state.client) + "» – «" + state.kcal + " Θερμίδες»</h2>";
   const emit = (title, arr) => {
-    html += "<p><b>" + escHtml(title) + "</b></p><ul>";
-    for (const t of arr) html += "<li>" + escHtml(t) + "</li>";
-    html += "</ul><p>&nbsp;</p>";
+    html += "<p><b>" + escHtml(title) + "</b></p>";
+    for (const t of arr) html += "<p style='margin:2px 0 2px 14px'>✓ " + escHtml(t) + "</p>";
+    html += "<p>&nbsp;</p>";
   };
   const note = proinoLine(tpl.proino_note);
   html += "<p><b>ΠΡΩΙΝΟ</b></p>";
   if (note) html += "<p>" + escHtml(note) + "</p>";
-  html += "<ul>"; for (const t of state.ch.B) html += "<li>" + escHtml(t) + "</li>"; html += "</ul><p>&nbsp;</p>";
+  for (const t of state.ch.B) html += "<p style='margin:2px 0 2px 14px'>✓ " + escHtml(t) + "</p>";
+  html += "<p>&nbsp;</p>";
   if (state.ch.D) emit("ΔΕΚΑΤΙΑΝΟ", state.ch.D);
   emit("ΑΠΟΓΕΥΜΑΤΙΝΟ", state.ch.E);
   if (state.ch.ST) emit("ΠΡΟ ΥΠΝΟΥ", state.ch.ST);
